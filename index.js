@@ -62,6 +62,7 @@ qCdr/OqIis0NfFHwnqwM+73DBdd4au8N2rNbze7Jb8J/Yebh0A==
 -----END CERTIFICATE-----`,
   },
 });
+
 db.connect();
 
 app.get("/", (req, res) => {
