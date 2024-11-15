@@ -1,39 +1,78 @@
 <%- include('partials/header') %>
 
-<div class="container mt-5">
-  <h1>Login</h1>
-
-  <div class="row">
-    <div class="col-sm-8">
-      <div class="card">
-        <div class="card-body">
-          <!-- Makes POST request to /login route -->
-          <form action="/login" method="POST">
-            <div class="form-group">
-              <label for="email">Email</label>
-              <input type="email" class="form-control" name="username" />
+<section class="vh-100" style="background-color: #e8ecef">
+  <div class="container py-5 h-100">
+    <div class="row d-flex align-items-center justify-content-center h-100">
+      <div class="col-md-8 col-lg-7 col-xl-6">
+        <div class="image-container">
+          <img
+            src="images\8134841_3834682.jpg"
+            class="img-fluid shadow-lg"
+            style="max-width: 100%; height: auto"
+            alt="Secrets Illustration"
+          />
+          <div class="overlay">
+            <div class="overlay-content">
+              <h3>Your Secrets</h3>
+              <p>Safe & Secure</p>
             </div>
-            <div class="form-group">
-              <label for="password">Password</label>
-              <input type="password" class="form-control" name="password" />
-            </div>
-            <button type="submit" class="btn btn-dark">Login</button>
-          </form>
+          </div>
         </div>
       </div>
-    </div>
+      <div class="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+        <form action="/login" method="POST">
+          <h2 class="text-center mb-4 display-4" style="font-weight: 400">
+            Login
+          </h2>
 
-    <div class="col-sm-4">
-      <div class="card">
-        <div class="card-body">
-          <a class="btn btn-block" href="/auth/google" role="button">
-            <i class="fab fa-google"></i>
-            Sign In with Google
+          <div class="form-outline mb-4">
+            <input
+              type="email"
+              id="form1Example13"
+              class="form-control form-control-lg shadow-sm"
+              name="username"
+              required
+              placeholder="Email address"
+            />
+          </div>
+
+          <div class="form-outline mb-4">
+            <input
+              type="password"
+              id="form1Example23"
+              class="form-control form-control-lg shadow-sm"
+              name="password"
+              required
+              placeholder="Password"
+            />
+          </div>
+
+          <button type="submit" class="btn btn-dark btn-lg btn-block shadow">
+            Login
+          </button>
+
+          <div class="divider d-flex align-items-center my-4">
+            <p class="text-center fw-bold m-auto mb-0 text-muted">OR</p>
+          </div>
+
+          <a
+            class="btn btn-outline-dark btn-lg btn-block shadow"
+            href="/auth/google"
+            role="button"
+          >
+            <i class="fab fa-google me-2"></i> Sign In with Google
           </a>
-        </div>
+
+          <div class="text-center mt-4">
+            <p class="mb-0">
+              Don't have an account?
+              <a href="/register" class="text-dark fw-bold">Register here</a>
+            </p>
+          </div>
+        </form>
       </div>
     </div>
   </div>
-</div>
+</section>
 
 <%- include('partials/footer') %>

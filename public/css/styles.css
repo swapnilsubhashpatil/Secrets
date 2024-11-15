@@ -1,11 +1,10 @@
-
 body {
-  background-color: #E8ECEF;
+  background-color: #e8ecef;
 }
 
 .centered {
-    padding-top: 200px;
-    text-align: center;
+  padding-top: 200px;
+  text-align: center;
 }
 
 .secret-text {
@@ -13,4 +12,47 @@ body {
   font-size: 2rem;
   color: #fff;
   background-color: #000;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden; /* Ensures the overlay stays within bounds */
+}
+
+.image-container img {
+  display: block; /* Prevents a small gap at the bottom */
+  transition: transform 0.3s ease; /* Add a smooth transition */
+}
+
+.image-container:hover img {
+  transform: scale(1.1); /* Slightly zoom in on hover */
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+  opacity: 0;
+  transition: opacity 0.3s ease; /* Smooth transition for opacity */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-container:hover .overlay {
+  opacity: 1;
+}
+
+.overlay-content {
+  text-align: center;
+  color: white;
+}
+
+.overlay-content h3 {
+  font-size: 24px;
+  margin-bottom: 10px;
 }
