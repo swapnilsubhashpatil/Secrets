@@ -33,7 +33,19 @@ const db = new pg.Client({
   database: process.env.PG_DATABASE,
   password: process.env.PG_PASSWORD,
   port: process.env.PG_PORT,
-  ssl: process.env.SSL,
+    ssl: {
+      rejectUnauthorized: true,
+      ca: -----BEGIN CERTIFICATE-----
+  MIIEQTCCAqmgAwIBAgIUfI1afi3bmFGk/ns2IP69LsbJG70wDQYJKoZIhvcNAQEM
+  BQAwOjE4MDYGA1UEAwwvY2E1NmMyZDEtYzIwNC00NzAwLWIyNTctOGE2OTY3ZTAw
+  ZjJjIFByb2plY3QgQ0EwHhcNMjQxMTA3MTIwMjE0WhcNMzQxMTA1MTIwMjE0WjA6
+  MTgwNgYDVQQDDC9jYTU2YzJkMS1jMjA0LTQ3MDAtYjI1Ny04YTY5NjdlMDBmMmMg
+  UHJvamVjdCBDQTCCAaIwDQYJKoZIhvcNAQEBBQADggGPADCCAYoCggGBAL81WpzH
+  4/hwXfDmpQ1/tICQNU4wblRR59wT+UPy4xKKkfk4rpjcvqiP7gWmuolYdCpl9EuG
+  S7GZ5TrT+/sK5efWr5xrWF32sYFRD0Ku/oyC/6ckW8Djhhy44XqaEWgRj6UidWz+
+  //... truncated certificate...
+  -----END CERTIFICATE-----,
+    },
 });
 db.connect();
 
