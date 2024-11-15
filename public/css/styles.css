@@ -56,3 +56,67 @@ body {
   font-size: 24px;
   margin-bottom: 10px;
 }
+
+@media (max-width: 768px) {
+  .home-section,
+  .secrets-section,
+  .submit-secret-section,
+  .vh-100 {
+    min-height: auto;
+  }
+
+  .jumbotron .display-3 {
+    font-size: 2.5rem;
+  }
+
+  .jumbotron .lead {
+    font-size: 1.2rem;
+  }
+
+  .hero-section .row {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .hero-section .col-md-6 {
+    margin-bottom: 20px;
+  }
+
+  .divider {
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+    width: 100%;
+    margin: 20px 0;
+  }
+
+  .login-register-links {
+    align-items: center;
+    margin-right: 0;
+    font-size: 1.5rem;
+  }
+
+  .image-container {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .secrets-section .col-md-4 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .display-4 {
+    font-size: 2.5rem;
+  }
+
+  .navbar-brand {
+    display: block; /* Allow the elements to stack vertically */
+    text-align: left; /* Align the text to the left */
+  }
+
+  .navbar-brand .text-muted {
+    margin-left: 0; /* Remove the left margin */
+    display: block; /* Ensure the text stays on a new line */
+    font-size: 0.8rem; /* Slightly reduce the font size */
+  }
+}
