@@ -74,7 +74,7 @@ app.get("/secrets", async (req, res) => {
   if (req.isAuthenticated()) {
     try {
       const result = await db.query(
-        "SELECT secret FROM secrets WHERE user_id = $1 ORDER BY created_at DESC",
+        "SELECT secret_id, secret FROM secrets WHERE user_id = $1 ORDER BY created_at DESC", // Include secret_id in the query
         [req.user.id]
       );
       res.render("secrets.ejs", { secrets: result.rows, user_id: req.user.id });
@@ -166,8 +166,8 @@ app.post("/submit", async (req, res) => {
 });
 
 // Route to handle deletion of a secret
-app.post("/secrets/delete/:secretId", async (req, res) => {
-  const secretId = req.params.secretId;
+app.post("/secrets/delete", async (req, res) => {
+  const secretId = req.body.secretId;
   const userId = req.body.user_id;
 
   try {
