@@ -1,41 +1,69 @@
-<%- include('partials/header') %>
-
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<%- include('partials/header') %> <% if (isMobile) { %>
+<div id="mobile-warning">
   <div class="container">
-    <a class="navbar-brand" href="#">Secrets</a>
-    <span class="text-muted">| Your secrets are safe with us.</span>
-    <button
-      class="navbar-toggler"
-      type="button"
-      data-bs-toggle="collapse"
-      data-bs-target="#navbarNav"
-      aria-controls="navbarNav"
-      aria-expanded="false"
-      aria-label="Toggle navigation"
-    >
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" href="/contact">
-            <i class="fas fa-envelope"></i> Contact Devloper
-          </a>
-        </li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<div class="jumbotron centered">
-  <div class="container">
-    <i class="fas fa-key fa-6x"></i>
-    <h1 class="display-3">Secrets</h1>
-    <p class="lead">Don't keep your secrets, share them anonymously!</p>
-    <hr />
-    <a class="btn btn-light btn-lg" href="/register" role="button">Register</a>
-    <a class="btn btn-dark btn-lg" href="/login" role="button">Login</a>
+    <i class="fas fa-user-secret fa-6x"></i>
+    <h1>Shhh... This is a Secret Society for Desktops Only!</h1>
+    <p>
+      Our secrets are best kept on bigger screens with keyboards and mice. 🤫
+      Mobile devices might spill the beans (and ruin the experience).
+    </p>
+    <p>
+      If you're on a desktop, come on in! If not, grab your computer and join
+      the secret society.
+    </p>
+    <button onclick="showMainContent()">Proceed Anyway</button>
   </div>
 </div>
+<% } %>
+
+<div id="main-content" <% if (isMobile) { %>
+  style="display: none;"<% } %>>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+      <a class="navbar-brand" href="#">Secrets</a>
+      <span class="text-muted">| Your secrets are safe with us.</span>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/contact">
+              <i class="fas fa-envelope"></i> Contact Devloper
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="jumbotron centered">
+    <div class="container">
+      <i class="fas fa-key fa-6x"></i>
+      <h1 class="display-3">Secrets</h1>
+      <p class="lead">Don't keep your secrets, share them anonymously!</p>
+      <hr />
+      <a class="btn btn-light btn-lg" href="/register" role="button"
+        >Register</a
+      >
+      <a class="btn btn-dark btn-lg" href="/login" role="button">Login</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showMainContent() {
+    document.getElementById("mobile-warning").style.display = "none";
+    document.getElementById("main-content").style.display = "block";
+  }
+</script>
 
 <%- include('partials/footer') %>

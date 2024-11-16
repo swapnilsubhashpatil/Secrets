@@ -66,7 +66,15 @@ const db = new pg.Client({
 db.connect();
 
 app.get("/", (req, res) => {
-  res.render("home.ejs");
+  let isMobile = false;
+  if (
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      req.headers["user-agent"]
+    )
+  ) {
+    isMobile = true;
+  }
+  res.render("home.ejs", { isMobile: isMobile });
 });
 
 app.get("/login", (req, res) => {
