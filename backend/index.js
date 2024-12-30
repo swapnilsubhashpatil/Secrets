@@ -39,22 +39,14 @@ app.use(
   })
 );
 
-const PgStore = pgSession(session);
-
 app.use(
   session({
-    store: new PgStore({
-      pool: db,
-      tableName: "session",
-    }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true,
-      sameSite: "none",
-      maxAge: 24 * 60 * 60 * 1000,
-      domain: process.env.COOKIE_DOMAIN,
+      secure: false, // Set to false for local development
+      sameSite: "lax",
     },
   })
 );
