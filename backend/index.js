@@ -41,13 +41,21 @@ app.use(
 
 app.use(
   session({
+    store: new PgStore({
+      pool: db,
+      tableName: "session",
+    }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // Set to false for local development
-      sameSite: "lax",
+      secure: true, // Required for HTTPS
+      sameSite: "none", // Required for cross-domain
+      httpOnly: true, // Prevents client-side access to the cookie
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      domain: "secretsfrontend.vercel.app", // Your Vercel domain
     },
+    name: "sessionId", // Custom cookie name
   })
 );
 
@@ -56,6 +64,17 @@ app.use(passport.session());
 
 app.get("/", (req, res) => {
   res.send("Server is running");
+});
+
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Origin",
+    "https://secretsfrontend.vercel.app"
+  );
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  next();
 });
 
 app.get("/api/logout", (req, res) => {
