@@ -1,0 +1,212 @@
+@import url("https://fonts.googleapis.com/css?family=Montserrat:400,800");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  background-color: #e9ecef;
+  min-height: 100vh;
+}
+
+nav {
+  background-color: #f0f0f0;
+  color: #333;
+  padding: 1rem;
+  position: relative;
+}
+.container {
+  max-width: 95%;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #333;
+  text-decoration: none;
+}
+
+.tagline {
+  font-size: 1.2rem;
+  font-weight: lighter;
+  color: #666;
+  display: none;
+}
+
+.main-tag {
+  font-size: 1.2rem;
+  font-weight: lighter;
+  color: #666;
+}
+
+.button {
+  text-align: right;
+}
+
+.contact-btn {
+  background-color: #333; /* Dark Gray Button */
+  margin: 5px;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.5s ease, color 0.3s ease, font-weight 1s ease;
+}
+
+.contact-btn:hover {
+  background-color: #a5bfcc;
+  color: #1c325b;
+  transform: translateY(-1px) translateX(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  font-weight: 400;
+}
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-grow: 1; /* This is the key change */
+  padding: 20px;
+  margin-top: 10vh;
+}
+
+.container-main {
+  max-width: 600px;
+}
+.main-heading {
+  font-size: 3rem;
+  color: #343a40;
+  margin-bottom: 10px;
+}
+
+.subtext {
+  font-size: 1.25rem;
+  color: #6c757d;
+  margin-bottom: 20px;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #dee2e6;
+  margin: 20px 0;
+}
+
+.btn-register,
+.btn-login {
+  display: inline-block;
+  font-size: 1rem;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 10px 20px;
+  margin: 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s;
+  cursor: pointer;
+}
+
+.btn-register {
+  color: #212529;
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+}
+
+.btn-register:hover {
+  background-color: #e2e6ea;
+}
+
+.btn-login {
+  color: #f8f9fa;
+  background-color: #343a40;
+  border: 1px solid #343a40;
+}
+
+.btn-login:hover {
+  background-color: #23272b;
+}
+
+.typography-container {
+  margin: 20px;
+}
+
+.heading-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+
+.heading-text {
+  flex: 1;
+}
+
+.heading-details {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #888;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.action-buttons button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #007bff;
+}
+
+@media screen and (max-width: 700px) {
+  /* Your existing styles for max-width: 900px */
+  .container {
+    max-width: 90%;
+  }
+  .main-tag {
+    display: none;
+  }
+  .tagline {
+    font-size: 0.7rem;
+    display: block;
+    margin-left: 0;
+    margin-top: 0.1rem;
+  }
+  .contact-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.6rem;
+  }
+  .logo {
+    font-size: 1.9rem;
+  }
+  .contact-btn {
+    padding: 0.4rem 0.4rem;
+  }
+}
+
+@keyframes unlock {
+  0% {
+    opacity: 0;
+    transform: rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: rotate(-10deg);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(0deg);
+  }
+}
