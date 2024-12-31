@@ -9,28 +9,28 @@ import bcrypt from "bcrypt";
 import fs from "fs";
 import env from "dotenv";
 import pgSession from "connect-pg-simple";
+import cookieParser from "cookie-parser";
 
 env.config();
 const app = express();
 const port = process.env.PORT || 3000;
 const PgStore = pgSession(session);
 
-// Database setup with error handling
-const db = new pg.Client({
+// Create a pool for better connection management
+const pool = new pg.Pool({
   user: process.env.PG_USER,
   host: process.env.PG_HOST,
   database: process.env.PG_DATABASE,
   password: process.env.PG_PASSWORD,
   port: process.env.PG_PORT,
-  ssl:
-    process.env.NODE_ENV === "production"
-      ? {
-          ca: fs.readFileSync("./certs/ca.pem").toString(),
-        }
-      : false,
+  ssl: {
+    ca: fs.readFileSync("./certs/ca.pem").toString(),
+  },
 });
 
-db.connect()
+// Test database connection
+pool
+  .query("SELECT NOW()")
   .then(() => console.log("Database connected successfully"))
   .catch((err) => {
     console.error("Database connection error:", err);
@@ -47,138 +47,230 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-// Middleware
+// Middleware setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser(process.env.SESSION_SECRET));
+
+// CORS configuration
 app.use(
   cors({
     origin: process.env.FRONTEND_URL,
     credentials: true,
-    methods: ["GET", "POST", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 // Session configuration
-app.use(
-  session({
-    store: new PgStore({
-      pool: db,
-      tableName: "session",
-      createTableIfMissing: true,
-    }),
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000,
-      domain:
-        process.env.NODE_ENV === "production"
-          ? "secret-xb7x.onrender.com"
-          : undefined,
-    },
-    name: "sessionId",
-  })
-);
+const sessionConfig = {
+  store: new PgStore({
+    pool: pool,
+    tableName: "session",
+    createTableIfMissing: true,
+  }),
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    domain: process.env.NODE_ENV === "production" ? ".onrender.com" : undefined,
+  },
+  name: "sessionId",
+};
 
+// Adjust cookie security for production
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
+
+app.use(session(sessionConfig));
 app.use(passport.initialize());
 app.use(passport.session());
 
-// CORS headers middleware
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
-  res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type,Authorization");
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
-// Authentication middleware
+// Enhanced authentication middleware
 const isAuthenticated = (req, res, next) => {
   if (!req.isAuthenticated()) {
-    return res
-      .status(401)
-      .json({ success: false, message: "Not authenticated" });
+    return res.status(401).json({
+      success: false,
+      message: "Authentication required",
+      redirectTo: "/login",
+    });
   }
   next();
 };
 
-// Session check route
+// Session check route with detailed response
 app.get("/api/check-auth", (req, res) => {
-  if (req.isAuthenticated()) {
-    res.json({
-      success: true,
-      isAuthenticated: true,
-      user: {
-        id: req.user.id,
-        email: req.user.email,
-      },
-    });
-  } else {
-    res.json({
-      success: false,
-      isAuthenticated: false,
-    });
-  }
+  res.json({
+    success: true,
+    isAuthenticated: req.isAuthenticated(),
+    user: req.isAuthenticated()
+      ? {
+          id: req.user.id,
+          email: req.user.email,
+        }
+      : null,
+    sessionID: req.sessionID,
+  });
 });
 
-// Logout route with proper session cleanup
+// Enhanced logout route with proper cookie cleanup
 app.get("/api/logout", (req, res) => {
-  const cookies = req.cookies;
-  for (const cookie in cookies) {
-    res.clearCookie(cookie, {
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      domain:
-        process.env.NODE_ENV === "production"
-          ? "secret-xb7x.onrender.com"
-          : undefined,
-    });
-  }
+  // Clear all cookies
+  const cookieOptions = {
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    domain: process.env.NODE_ENV === "production" ? ".onrender.com" : undefined,
+  };
+
+  res.clearCookie("sessionId", cookieOptions);
+  res.clearCookie("connect.sid", cookieOptions);
 
   req.logout((err) => {
     if (err) {
       console.error("Logout error:", err);
-      return res
-        .status(500)
-        .json({ success: false, message: "Error during logout" });
+      return res.status(500).json({
+        success: false,
+        message: "Error during logout",
+      });
     }
+
     req.session.destroy((err) => {
       if (err) {
         console.error("Session destruction error:", err);
-        return res
-          .status(500)
-          .json({ success: false, message: "Error destroying session" });
+        return res.status(500).json({
+          success: false,
+          message: "Error destroying session",
+        });
       }
-      res.json({ success: true, message: "Logged out successfully" });
+
+      res.json({
+        success: true,
+        message: "Logged out successfully",
+      });
     });
   });
 });
 
-// Protected secrets route
+// Protected secrets routes
 app.get("/api/secrets", isAuthenticated, async (req, res) => {
   try {
-    const result = await db.query(
+    const result = await pool.query(
       "SELECT secret_id, secret, created_at FROM secrets WHERE user_id = $1 ORDER BY created_at DESC",
       [req.user.id]
     );
-    res.json({ success: true, secrets: result.rows });
+    res.json({
+      success: true,
+      secrets: result.rows,
+    });
   } catch (err) {
     console.error("Error retrieving secrets:", err);
-    res
-      .status(500)
-      .json({ success: false, message: "Error retrieving secrets" });
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving secrets",
+    });
   }
 });
 
-// Login route with enhanced error handling
+app.post("/api/submit", isAuthenticated, async (req, res) => {
+  try {
+    const { secret, secretId } = req.body;
+
+    if (!secret) {
+      return res.status(400).json({
+        success: false,
+        message: "Secret content is required",
+      });
+    }
+
+    if (secretId) {
+      // Update existing secret
+      const result = await pool.query(
+        "UPDATE secrets SET secret = $1 WHERE secret_id = $2 AND user_id = $3 RETURNING *",
+        [secret, secretId, req.user.id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Secret not found or unauthorized",
+        });
+      }
+
+      res.json({
+        success: true,
+        secret: result.rows[0],
+      });
+    } else {
+      // Create new secret
+      const result = await pool.query(
+        "INSERT INTO secrets (user_id, secret) VALUES ($1, $2) RETURNING *",
+        [req.user.id, secret]
+      );
+
+      res.json({
+        success: true,
+        secret: result.rows[0],
+      });
+    }
+  } catch (err) {
+    console.error("Error submitting secret:", err);
+    res.status(500).json({
+      success: false,
+      message: "Error submitting secret",
+    });
+  }
+});
+
+app.post("/api/secrets/delete", isAuthenticated, async (req, res) => {
+  try {
+    const { secretId } = req.body;
+
+    if (!secretId) {
+      return res.status(400).json({
+        success: false,
+        message: "Secret ID is required",
+      });
+    }
+
+    const result = await pool.query(
+      "DELETE FROM secrets WHERE secret_id = $1 AND user_id = $2 RETURNING *",
+      [secretId, req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Secret not found or unauthorized",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Secret deleted successfully",
+    });
+  } catch (err) {
+    console.error("Error deleting secret:", err);
+    res.status(500).json({
+      success: false,
+      message: "Error deleting secret",
+    });
+  }
+});
+
+// Enhanced login route with validation
 app.post("/api/login", (req, res, next) => {
+  if (!req.body.username || !req.body.password) {
+    return res.status(400).json({
+      success: false,
+      message: "Username and password are required",
+    });
+  }
+
   passport.authenticate("local", (err, user, info) => {
     if (err) {
       console.error("Login error:", err);
@@ -204,6 +296,16 @@ app.post("/api/login", (req, res, next) => {
         });
       }
 
+      // Set cookie explicitly
+      res.cookie("sessionId", req.sessionID, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 24 * 60 * 60 * 1000,
+        domain:
+          process.env.NODE_ENV === "production" ? ".onrender.com" : undefined,
+      });
+
       res.json({
         success: true,
         user: {
@@ -215,7 +317,7 @@ app.post("/api/login", (req, res, next) => {
   })(req, res, next);
 });
 
-// Registration route with validation
+// Enhanced registration route with validation
 app.post("/api/register", async (req, res) => {
   const { username, password } = req.body;
 
@@ -226,10 +328,29 @@ app.post("/api/register", async (req, res) => {
     });
   }
 
+  // Basic email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(username)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid email format",
+    });
+  }
+
+  // Password strength validation
+  if (password.length < 8) {
+    return res.status(400).json({
+      success: false,
+      message: "Password must be at least 8 characters long",
+    });
+  }
+
   try {
-    const userExists = await db.query("SELECT id FROM users WHERE email = $1", [
-      username,
-    ]);
+    const userExists = await pool.query(
+      "SELECT id FROM users WHERE email = $1",
+      [username]
+    );
+
     if (userExists.rows.length > 0) {
       return res.status(400).json({
         success: false,
@@ -238,7 +359,7 @@ app.post("/api/register", async (req, res) => {
     }
 
     const hash = await bcrypt.hash(password, 10);
-    const result = await db.query(
+    const result = await pool.query(
       "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email",
       [username, hash]
     );
@@ -251,6 +372,17 @@ app.post("/api/register", async (req, res) => {
           message: "Error logging in after registration",
         });
       }
+
+      // Set cookie explicitly
+      res.cookie("sessionId", req.sessionID, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 24 * 60 * 60 * 1000,
+        domain:
+          process.env.NODE_ENV === "production" ? ".onrender.com" : undefined,
+      });
+
       res.json({
         success: true,
         user: {
@@ -282,23 +414,33 @@ app.get(
     failureRedirect: `${process.env.FRONTEND_URL}/login`,
   }),
   (req, res) => {
+    res.cookie("sessionId", req.sessionID, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+      domain:
+        process.env.NODE_ENV === "production" ? ".onrender.com" : undefined,
+    });
     res.redirect(`${process.env.FRONTEND_URL}/secrets`);
   }
 );
 
-// Passport configuration
+// Passport Local Strategy
 passport.use(
   new LocalStrategy(async (username, password, done) => {
     try {
-      const result = await db.query("SELECT * FROM users WHERE email = $1", [
+      const result = await pool.query("SELECT * FROM users WHERE email = $1", [
         username,
       ]);
+
       if (result.rows.length === 0) {
         return done(null, false, { message: "User not found" });
       }
 
       const user = result.rows[0];
       const valid = await bcrypt.compare(password, user.password);
+
       if (!valid) {
         return done(null, false, { message: "Invalid password" });
       }
@@ -310,6 +452,7 @@ passport.use(
   })
 );
 
+// Passport Google Strategy
 passport.use(
   new GoogleStrategy(
     {
@@ -321,12 +464,13 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       try {
         const email = profile.emails[0].value;
-        const result = await db.query("SELECT * FROM users WHERE email = $1", [
-          email,
-        ]);
+        const result = await pool.query(
+          "SELECT * FROM users WHERE email = $1",
+          [email]
+        );
 
         if (result.rows.length === 0) {
-          const newUser = await db.query(
+          const newUser = await pool.query(
             "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING *",
             [email, "google-oauth"]
           );
@@ -352,8 +496,8 @@ passport.deserializeUser((user, done) => {
 // Global error handler
 app.use(errorHandler);
 
-// Server startup
-app
+// Server startup with enhanced error handling
+const server = app
   .listen(port, () => {
     console.log(`Server running on port ${port}`);
   })
@@ -362,14 +506,10 @@ app
     process.exit(1);
   });
 
-// Handle uncaught exceptions
-process.on("uncaughtException", (err) => {
-  console.error("Uncaught Exception:", err);
-  process.exit(1);
-});
-
-// Handle unhandled promise rejections
-process.on("unhandledRejection", (err) => {
-  console.error("Unhandled Rejection:", err);
-  process.exit(1);
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  console.log("SIGTERM signal received. Closing server...");
+  server.close(() => {
+    console.log("Server closed");
+  });
 });

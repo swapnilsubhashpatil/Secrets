@@ -14,6 +14,7 @@ import Nav from "./Nav";
 import EmptyState from "./EmptyState";
 import { secretService } from "./apiService";
 
+// Styled Components
 const ClippedCard = styled(Card)(({ theme }) => ({
   position: "relative",
   background: "#3E5879",
@@ -77,92 +78,101 @@ const AddCard = styled(Card)(({ theme }) => ({
 }));
 
 const SecretPage = () => {
+  // State Management
   const [error, setError] = useState("");
-  const [items, setItems] = useState([]);
+  const [secrets, setSecrets] = useState([]);
   const [newSecret, setNewSecret] = useState("");
+  const [editingId, setEditingId] = useState(null);
 
+  // Fetch secrets on component mount
   useEffect(() => {
     fetchSecrets();
   }, []);
 
+  // Fetch all secrets
   const fetchSecrets = async () => {
     try {
       const response = await secretService.fetchSecrets();
-      setItems(
-        response.data.secrets.map((secret) => ({
-          id: secret.secret_id,
-          title: secret.secret,
-          editing: false,
-        }))
-      );
+      if (response.data.success) {
+        setSecrets(response.data.secrets);
+        setError("");
+      }
     } catch (err) {
-      setError("Error fetching secrets. Please try again.");
+      console.error("Fetch error:", err);
+      setError("Failed to load secrets. Please try again.");
     }
   };
 
+  // Add new secret
   const handleAddSecret = async () => {
     if (!newSecret.trim()) return;
 
     try {
       const response = await secretService.addSecret(newSecret);
-      setItems([
-        ...items,
-        {
-          id: response.data.secret_id,
-          title: newSecret,
-          editing: false,
-        },
-      ]);
-      setNewSecret("");
+      if (response.data.success) {
+        await fetchSecrets(); // Refresh the list
+        setNewSecret("");
+        setError("");
+      }
     } catch (err) {
-      setError("Error adding secret. Please try again.");
+      console.error("Add error:", err);
+      setError("Failed to add secret. Please try again.");
     }
   };
 
+  // Enable edit mode
+  const handleEdit = (id) => {
+    setEditingId(id);
+  };
+
+  // Cancel edit mode
+  const handleCancel = () => {
+    setEditingId(null);
+  };
+
+  // Save edited secret
   const handleSave = async (id, newTitle) => {
+    if (!newTitle.trim()) return;
+
     try {
-      await secretService.updateSecret(id, newTitle);
-      setItems(
-        items.map((item) =>
-          item.id === id ? { ...item, title: newTitle, editing: false } : item
-        )
-      );
+      const response = await secretService.updateSecret(id, newTitle);
+      if (response.data.success) {
+        await fetchSecrets(); // Refresh the list
+        setEditingId(null);
+        setError("");
+      }
     } catch (err) {
-      setError("Error updating secret. Please try again.");
+      console.error("Update error:", err);
+      setError("Failed to update secret. Please try again.");
     }
   };
 
+  // Delete secret
   const handleDelete = async (id) => {
     try {
-      await secretService.deleteSecret(id);
-      setItems(items.filter((item) => item.id !== id));
+      const response = await secretService.deleteSecret(id);
+      if (response.data.success) {
+        await fetchSecrets(); // Refresh the list
+        setError("");
+      }
     } catch (err) {
-      setError("Error deleting secret. Please try again.");
+      console.error("Delete error:", err);
+      setError("Failed to delete secret. Please try again.");
     }
-  };
-
-  const handleEdit = (id) => {
-    setItems(
-      items.map((item) => (item.id === id ? { ...item, editing: true } : item))
-    );
-  };
-
-  const handleCancel = (id) => {
-    setItems(
-      items.map((item) => (item.id === id ? { ...item, editing: false } : item))
-    );
   };
 
   return (
     <div>
       <Nav onSecrets={true} />
       <Box sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
+        {/* Error Display */}
         {error && (
           <Typography color="error" sx={{ mb: 2 }}>
             {error}
           </Typography>
         )}
 
+        {/* Add New Secret Section */}
         <AddCard>
           <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
             <TextField
@@ -196,11 +206,12 @@ const SecretPage = () => {
           </Box>
         </AddCard>
 
-        {items.length === 0 ? (
+        {/* Secrets List */}
+        {secrets.length === 0 ? (
           <EmptyState />
         ) : (
-          items.map((item) => (
-            <ClippedCard key={item.id}>
+          secrets.map((secret) => (
+            <ClippedCard key={secret.secret_id}>
               <CardContent
                 sx={{
                   position: "relative",
@@ -211,32 +222,38 @@ const SecretPage = () => {
                   p: 3,
                 }}
               >
-                {item.editing ? (
+                {editingId === secret.secret_id ? (
+                  // Edit Mode
                   <ModernInput
-                    defaultValue={item.title}
+                    defaultValue={secret.secret}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter")
-                        handleSave(item.id, e.target.value);
-                      if (e.key === "Escape") handleCancel(item.id);
+                      if (e.key === "Enter") {
+                        handleSave(secret.secret_id, e.target.value);
+                      }
+                      if (e.key === "Escape") {
+                        handleCancel();
+                      }
                     }}
                     autoFocus
                   />
                 ) : (
+                  // Display Mode
                   <Typography sx={{ color: "#1A1A1A", fontWeight: 600 }}>
-                    {item.title}
+                    {secret.secret}
                   </Typography>
                 )}
 
+                {/* Action Buttons */}
                 <Box sx={{ display: "flex", gap: 1 }}>
-                  {item.editing ? (
+                  {editingId === secret.secret_id ? (
                     <>
                       <IconButton
-                        onClick={() =>
-                          handleSave(
-                            item.id,
-                            document.querySelector("input").value
-                          )
-                        }
+                        onClick={(e) => {
+                          const input = e.target
+                            .closest(".MuiCardContent-root")
+                            .querySelector("input");
+                          handleSave(secret.secret_id, input.value);
+                        }}
                         sx={{
                           color: "#90caf9",
                           "&:hover": { bgcolor: "rgba(144, 202, 249, 0.08)" },
@@ -245,7 +262,7 @@ const SecretPage = () => {
                         <Save />
                       </IconButton>
                       <IconButton
-                        onClick={() => handleCancel(item.id)}
+                        onClick={handleCancel}
                         sx={{
                           color: "#f48fb1",
                           "&:hover": { bgcolor: "rgba(244, 143, 177, 0.08)" },
@@ -257,7 +274,7 @@ const SecretPage = () => {
                   ) : (
                     <>
                       <IconButton
-                        onClick={() => handleEdit(item.id)}
+                        onClick={() => handleEdit(secret.secret_id)}
                         sx={{
                           color: "#A7D477",
                           "&:hover": { bgcolor: "#E5D9F2" },
@@ -266,7 +283,7 @@ const SecretPage = () => {
                         <Edit />
                       </IconButton>
                       <IconButton
-                        onClick={() => handleDelete(item.id)}
+                        onClick={() => handleDelete(secret.secret_id)}
                         sx={{
                           color: "#F72C5B",
                           "&:hover": { bgcolor: "#E5D9F2" },
