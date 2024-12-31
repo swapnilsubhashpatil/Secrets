@@ -31,7 +31,7 @@ export const authService = {
   logout: () => api.get("/api/logout"),
   googleAuth: () => {
     // For Google OAuth, we need to handle it differently
-    const googleAuthUrl = `${API_BASE_URL}/api/auth/google`;
+    const googleAuthUrl = `${API_BASE_URL}/auth/google`;
     window.location.href = googleAuthUrl;
   },
 };
