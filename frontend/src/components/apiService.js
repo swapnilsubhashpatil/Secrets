@@ -8,6 +8,8 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  // Add this to ensure cookies are sent with every request
+  withCredentials: true,
 });
 
 // Add response interceptor to handle errors

@@ -23,7 +23,7 @@ const pool = new pg.Pool({
   password: process.env.PG_PASSWORD,
   port: process.env.PG_PORT,
   ssl: {
-    ca: process.env.CA_CERTIFICATE,
+    ca: fs.readFileSync("./certs/ca.pem").toString(),
   },
 });
 // fs.readFileSync("./certs/ca.pem").toString(),
@@ -86,20 +86,15 @@ const sessionConfig = {
     pool,
     tableName: "session",
     createTableIfMissing: true,
-    pruneSessionInterval: 60, // Prune expired sessions every 60 seconds
   }),
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: true, // Since Vercel uses HTTPS
+    sameSite: "none", // Required for cross-domain cookies
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    domain:
-      process.env.NODE_ENV === "production"
-        ? ".secretsfrontend.vercel.app"
-        : undefined,
   },
   name: "sessionId",
   proxy: true,
@@ -140,7 +135,12 @@ const isAuthenticated = (req, res, next) => {
   next();
 };
 
-app.set("trust proxy", 1);
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Origin", process.env.FRONTEND_URL);
+  next();
+});
+
 // Session check route with detailed response
 app.get("/api/check-auth", (req, res) => {
   res.json({
@@ -305,32 +305,16 @@ app.post("/api/secrets/delete", isAuthenticated, async (req, res) => {
 
 // Enhanced login route with validation
 app.post("/api/login", (req, res, next) => {
-  if (!req.body.username || !req.body.password) {
-    return res.status(400).json({
-      success: false,
-      message: "Username and password are required",
-    });
-  }
-
   passport.authenticate("local", (err, user, info) => {
-    if (err) {
-      console.error("Login error:", err);
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error during login",
-      });
-    }
-
-    if (!user) {
+    if (err || !user) {
       return res.status(401).json({
         success: false,
-        message: info.message || "Invalid credentials",
+        message: info?.message || "Authentication failed",
       });
     }
 
     req.login(user, (err) => {
       if (err) {
-        console.error("Session error:", err);
         return res.status(500).json({
           success: false,
           message: "Error establishing session",
@@ -340,16 +324,12 @@ app.post("/api/login", (req, res, next) => {
       // Set cookie explicitly
       res.cookie("sessionId", req.sessionID, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: true,
+        sameSite: "none",
         maxAge: 24 * 60 * 60 * 1000,
-        domain:
-          process.env.NODE_ENV === "production"
-            ? ".secretsfrontend.vercel.app"
-            : undefined,
       });
 
-      res.json({
+      return res.json({
         success: true,
         user: {
           id: user.id,
