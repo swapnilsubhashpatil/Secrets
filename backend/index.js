@@ -10,12 +10,18 @@ import fs from "fs";
 import env from "dotenv";
 import pgSession from "connect-pg-simple";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const caCertPath = path.join(__dirname, "public", "certs", "ca.pem");
 
 env.config();
 const app = express();
 const port = process.env.PORT || 3000;
 const PgStore = pgSession(session);
-
 // Create a pool for better connection management
 const pool = new pg.Pool({
   user: process.env.PG_USER,
@@ -27,7 +33,7 @@ const pool = new pg.Pool({
     ca: fs.readFileSync("./certs/ca.pem").toString(),
   },
 });
-
+// fs.readFileSync("./certs/ca.pem").toString(),
 // Test database connection
 pool
   .query("SELECT NOW()")
