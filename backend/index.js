@@ -158,18 +158,13 @@ app.get("/api/check-auth", (req, res) => {
 
 // Enhanced logout route with proper cookie cleanup
 app.get("/api/logout", (req, res) => {
-  // Clear all cookies
-  const cookieOptions = {
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    domain:
-      process.env.NODE_ENV === "production"
-        ? ".secretsfrontend.vercel.app"
-        : undefined,
-  };
-
-  res.clearCookie("sessionId", cookieOptions);
-  res.clearCookie("connect.sid", cookieOptions);
+  // Clear session cookie
+  res.cookie("sessionId", "", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    expires: new Date(0),
+  });
 
   req.logout((err) => {
     if (err) {
@@ -369,6 +364,7 @@ app.post("/api/register", async (req, res) => {
   }
 
   try {
+    // Check if user already exists
     const userExists = await pool.query(
       "SELECT id FROM users WHERE email = $1",
       [username]
@@ -381,12 +377,14 @@ app.post("/api/register", async (req, res) => {
       });
     }
 
+    // Create new user
     const hash = await bcrypt.hash(password, 10);
     const result = await pool.query(
       "INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email",
       [username, hash]
     );
 
+    // Log in the newly registered user
     req.login(result.rows[0], (err) => {
       if (err) {
         console.error("Login error after registration:", err);
@@ -396,18 +394,15 @@ app.post("/api/register", async (req, res) => {
         });
       }
 
-      // Set cookie explicitly
+      // Set session cookie
       res.cookie("sessionId", req.sessionID, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 24 * 60 * 60 * 1000,
-        domain:
-          process.env.NODE_ENV === "production"
-            ? ".secretsfrontend.vercel.app"
-            : undefined,
+        secure: true,
+        sameSite: "none",
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
       });
 
+      // Return success response
       res.json({
         success: true,
         user: {
@@ -437,18 +432,28 @@ app.get(
   "/auth/google/secrets",
   passport.authenticate("google", {
     failureRedirect: `${process.env.FRONTEND_URL}/login`,
+    session: true,
   }),
   (req, res) => {
+    // Ensure user is authenticated
+    if (!req.user) {
+      return res.redirect(
+        `${process.env.FRONTEND_URL}/login?error=auth_failed`
+      );
+    }
+
+    // Set session cookie with proper security settings
     res.cookie("sessionId", req.sessionID, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 24 * 60 * 60 * 1000,
-      domain:
-        process.env.NODE_ENV === "production"
-          ? ".secretsfrontend.vercel.app"
-          : undefined,
+      secure: true,
+      sameSite: "none",
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     });
+
+    // Log successful authentication
+    console.log("Google OAuth successful, user:", req.user.email);
+
+    // Redirect to frontend with success
     res.redirect(`${process.env.FRONTEND_URL}/secrets`);
   }
 );
