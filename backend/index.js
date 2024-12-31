@@ -422,7 +422,7 @@ app.post("/api/register", async (req, res) => {
 
 // Google OAuth routes
 app.get(
-  "/api/auth/google",
+  "/auth/google",
   passport.authenticate("google", {
     scope: ["profile", "email"],
   })
