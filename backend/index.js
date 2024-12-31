@@ -98,10 +98,11 @@ const sessionConfig = {
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     domain:
       process.env.NODE_ENV === "production"
-        ? "secretsfrontend.vercel.app"
+        ? ".secretsfrontend.vercel.app"
         : undefined,
   },
   name: "sessionId",
+  proxy: true,
 };
 
 const initializeSessionStore = async () => {
@@ -139,6 +140,7 @@ const isAuthenticated = (req, res, next) => {
   next();
 };
 
+app.set("trust proxy", 1);
 // Session check route with detailed response
 app.get("/api/check-auth", (req, res) => {
   res.json({
@@ -160,7 +162,10 @@ app.get("/api/logout", (req, res) => {
   const cookieOptions = {
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    domain: process.env.NODE_ENV === "production" ? ".onrender.com" : undefined,
+    domain:
+      process.env.NODE_ENV === "production"
+        ? ".secretsfrontend.vercel.app"
+        : undefined,
   };
 
   res.clearCookie("sessionId", cookieOptions);
@@ -339,7 +344,9 @@ app.post("/api/login", (req, res, next) => {
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 24 * 60 * 60 * 1000,
         domain:
-          process.env.NODE_ENV === "production" ? ".onrender.com" : undefined,
+          process.env.NODE_ENV === "production"
+            ? ".secretsfrontend.vercel.app"
+            : undefined,
       });
 
       res.json({
@@ -416,7 +423,9 @@ app.post("/api/register", async (req, res) => {
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 24 * 60 * 60 * 1000,
         domain:
-          process.env.NODE_ENV === "production" ? ".onrender.com" : undefined,
+          process.env.NODE_ENV === "production"
+            ? ".secretsfrontend.vercel.app"
+            : undefined,
       });
 
       res.json({
@@ -456,7 +465,9 @@ app.get(
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000,
       domain:
-        process.env.NODE_ENV === "production" ? ".onrender.com" : undefined,
+        process.env.NODE_ENV === "production"
+          ? ".secretsfrontend.vercel.app"
+          : undefined,
     });
     res.redirect(`${process.env.FRONTEND_URL}/secrets`);
   }
