@@ -62,12 +62,31 @@ app.use(
   })
 );
 
+const createSessionTable = async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS "session" (
+        "sid" varchar NOT NULL COLLATE "default",
+        "sess" json NOT NULL,
+        "expire" timestamp(6) NOT NULL,
+        CONSTRAINT "session_pkey" PRIMARY KEY ("sid")
+      );
+      CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire");
+    `);
+    console.log("Session table verified/created successfully");
+  } catch (err) {
+    console.error("Error creating session table:", err);
+    throw err;
+  }
+};
+
 // Session configuration
 const sessionConfig = {
   store: new PgStore({
-    pool: pool,
+    pool,
     tableName: "session",
     createTableIfMissing: true,
+    pruneSessionInterval: 60, // Prune expired sessions every 60 seconds
   }),
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -81,6 +100,20 @@ const sessionConfig = {
   },
   name: "sessionId",
 };
+
+const initializeSessionStore = async () => {
+  try {
+    await createSessionTable();
+    app.use(session(sessionConfig));
+    console.log("Session store initialized successfully");
+  } catch (err) {
+    console.error("Failed to initialize session store:", err);
+    process.exit(1);
+  }
+};
+
+// Call the initialization function
+initializeSessionStore();
 
 // Adjust cookie security for production
 if (process.env.NODE_ENV === "production") {
