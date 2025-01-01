@@ -192,7 +192,14 @@ const SecretPage = () => {
         )}
 
         <AddCard>
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 2,
+              alignItems: "center",
+              position: "fixed",
+            }}
+          >
             <TextField
               fullWidth
               variant="outlined"

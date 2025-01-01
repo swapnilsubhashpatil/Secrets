@@ -92,7 +92,10 @@ body {
 }
 
 .nav-button.logout:hover {
-  background-color: #c82333;
+  background-color: #a5bfcc;
+  color: #1c325b;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive Design */
@@ -197,29 +200,44 @@ body {
   color: #007bff;
 }
 
-@media screen and (max-width: 700px) {
-  /* Your existing styles for max-width: 900px */
-  .container {
-    max-width: 90%;
+@media screen and (max-width: 768px) {
+  .nav-content {
+    padding: 0 0.5rem;
   }
-  .main-tag {
+
+  .nav-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Aligns items to the left */
+  }
+
+  .logo-text {
+    font-size: 2.2rem; /* Matching your original size */
+    margin-bottom: 0; /* Remove bottom margin */
+  }
+
+  .nav-tagline {
+    display: block;
+    font-size: 0.7rem; /* Matching your original size */
+    margin-left: 3px;
+    margin-top: -0.4rem; /* Matching your original spacing */
+    line-height: 1; /* Tighter line height for compact layout */
+  }
+
+  .nav-main-tag {
     display: none;
   }
-  .tagline {
-    font-size: 0.7rem;
-    display: block;
-    margin-left: 0;
-    margin-top: 0.1rem;
+
+  nav-button {
+    /* Significantly reduced button size for mobile */
+    padding: 0.3rem 0.6rem; /* Smaller padding */
+    font-size: 0.7rem; /* Smaller font size */
+    font-weight: 400; /* Slightly lighter font weight */
+    min-width: 60px; /* Ensure minimum button width */
   }
-  .contact-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.6rem;
-  }
-  .logo {
-    font-size: 1.9rem;
-  }
-  .contact-btn {
-    padding: 0.4rem 0.4rem;
+
+  .nav-buttons {
+    gap: 0.3rem;
   }
 }
 
