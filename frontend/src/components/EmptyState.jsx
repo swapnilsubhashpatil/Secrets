@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { Ghost, MessageCircle } from "lucide-react";
-import TypingAinmation from "./TypingAnimation";
+import TypingAinmation from "./Typing Animation";
 
 const InteractiveEmptyState = () => {
   const [isClient, setIsClient] = useState(false);
