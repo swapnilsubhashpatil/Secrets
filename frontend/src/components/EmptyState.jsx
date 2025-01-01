@@ -43,9 +43,9 @@ const InteractiveEmptyState = () => {
   if (!isClient) return null;
 
   return (
-    <div className="min-h-[500px] flex items-center justify-center p-2">
+    <div className="w-full h-screen flex items-center justify-center p-6">
       <motion.div
-        className="relative"
+        className="relative w-full max-w-lg mx-auto"
         style={{
           rotateX: rotateX,
           rotateY: rotateY,
@@ -69,7 +69,7 @@ const InteractiveEmptyState = () => {
               top: "20%",
             }}
           >
-            <Ghost className="w-12 h-12 text-indigo-400 opacity-80" />
+            <Ghost className="w-8 h-8 md:w-12 md:h-12 text-indigo-400 opacity-80" />
           </motion.div>
 
           {/* Message bubble */}
@@ -90,28 +90,28 @@ const InteractiveEmptyState = () => {
               top: "25%",
             }}
           >
-            <MessageCircle className="w-10 h-10 text-pink-400 opacity-80" />
+            <MessageCircle className="w-6 h-6 md:w-10 md:h-10 text-pink-400 opacity-80" />
           </motion.div>
 
           {/* Content */}
-          <div className="text-center max-w-sm mx-auto mt-16 mb-8">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+          <div className="text-center max-w-xs mx-auto mt-12 mb-6">
+            <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-3">
               You haven't shared any secrets
             </h2>
-            <p className="text-gray-500 text-sm italic">
+            <p className="text-gray-500 text-xs md:text-sm italic">
               We're better at keeping secrets than your best friend!🤫
             </p>
-            <p className="text-gray-400 text-xs mt-4">
+            <p className="text-gray-400 text-xs mt-3">
               <TypingAinmation />
             </p>
           </div>
 
           {/* Bottom decorative elements */}
-          <div className="flex justify-center gap-3">
+          <div className="flex justify-center gap-2">
             {[...Array(3)].map((_, i) => (
               <motion.div
                 key={i}
-                className="w-2 h-2 rounded-full bg-indigo-400"
+                className="w-1.5 h-1.5 rounded-full bg-indigo-400"
                 animate={{
                   scale: [1, 1.2, 1],
                   opacity: [0.5, 1, 0.5],
