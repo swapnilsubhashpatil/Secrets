@@ -70,7 +70,7 @@ const EmptyState = () => {
     <EmptyStateCard elevation={0}>
       <WavingEmoji />
       <EmptyStateMessage>
-        You haven't shared any secrets <span>yet</span>!
+        You haven't shared any secrets <span>yet</span> !
       </EmptyStateMessage>
       <SubMessage>
         Share your first secret and unlock a world of mysterious possibilities.

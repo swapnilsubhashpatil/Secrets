@@ -228,12 +228,12 @@ body {
     display: none;
   }
 
-  nav-button {
-    /* Significantly reduced button size for mobile */
-    padding: 0.3rem 0.6rem; /* Smaller padding */
-    font-size: 0.7rem; /* Smaller font size */
-    font-weight: 400; /* Slightly lighter font weight */
-    min-width: 60px; /* Ensure minimum button width */
+  .nav-button.logout,
+  .nav-button {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 400;
+    min-width: 60px;
   }
 
   .nav-buttons {
