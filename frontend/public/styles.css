@@ -230,14 +230,14 @@ body {
 
   .nav-button.logout,
   .nav-button {
-    padding: 0.3rem 0.6rem;
-    font-size: 0.7rem;
-    font-weight: 400;
-    min-width: 60px;
+    padding: 0.5rem 1rem; /* Increased padding */
+    font-size: 0.9rem; /* Larger font size */
+    font-weight: 500; /* Slightly bolder */
+    min-width: 80px; /* Wider minimum width */
   }
 
   .nav-buttons {
-    gap: 0.3rem;
+    gap: 0.5rem; /* Increased gap between buttons */
   }
 }
 

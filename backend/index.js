@@ -308,10 +308,17 @@ app.post("/api/secrets/delete", isAuthenticated, async (req, res) => {
 // Enhanced login route with validation
 app.post("/api/login", (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
-    if (err || !user) {
+    if (err) {
       return res.status(401).json({
         success: false,
         message: info?.message || "Authentication failed",
+      });
+    }
+
+    if (!user) {
+      return res.status(500).json({
+        success: false,
+        message: info?.message || "Invalid credentials",
       });
     }
 
