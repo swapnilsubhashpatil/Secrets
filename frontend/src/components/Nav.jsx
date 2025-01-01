@@ -1,6 +1,7 @@
 import React from "react";
 import TypingAnimation from "./Typing Animation";
 import axios from "axios";
+
 function Nav(props) {
   function handleClick() {
     const receiverEmail = "patilswapnilsubhash@gmail.com";
@@ -18,39 +19,37 @@ function Nav(props) {
     axios
       .get("/api/logout")
       .then((response) => {
-        // Handle successful logout (e.g., redirect to login page)
-        window.location.href = "/"; // Redirect to login page
+        window.location.href = "/";
       })
       .catch((error) => {
-        // Handle errors (e.g., display an error message to the user)
         console.error("Logout failed:", error);
-        // Optionally, display an error message to the user
       });
   }
 
   return (
-    <nav className="img">
-      <div className="container">
-        <div className="logo">
-          <a>Secrets</a>
+    <nav className="nav-container">
+      <div className="nav-content">
+        <div className="nav-logo">
+          <a className="logo-text">Secrets</a>
           {props.onSecrets === false && (
-            <div className="tagline">
+            <div className="nav-tagline">
               <TypingAnimation />
             </div>
           )}
         </div>
+
         {props.onSecrets === false && (
-          <div className="main-tag">
+          <div className="nav-main-tag">
             <TypingAnimation />
           </div>
         )}
 
-        <div className="button">
-          <button class="contact-btn" onClick={handleClick}>
+        <div className="nav-buttons">
+          <button className="nav-button" onClick={handleClick}>
             Developer
           </button>
           {props.onSecrets === true && (
-            <button className="contact-btn" onClick={logOut}>
+            <button className="nav-button logout" onClick={logOut}>
               Log Out
             </button>
           )}

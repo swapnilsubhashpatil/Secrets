@@ -13,63 +13,90 @@ body {
   min-height: 100vh;
 }
 
-nav {
-  background-color: #f0f0f0;
-  color: #333;
+.nav-container {
+  background-color: #f8fafc;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 1rem;
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: all 0.3s ease;
 }
-.container {
-  max-width: 95%;
+
+.nav-content {
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 0 1rem;
 }
 
-.logo {
+.nav-logo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.logo-text {
   font-size: 1.8rem;
-  font-weight: bold;
-  letter-spacing: 1px;
+  font-weight: 700;
   color: #333;
   text-decoration: none;
+  letter-spacing: 0.5px;
+  transition: color 0.3s ease;
 }
 
-.tagline {
-  font-size: 1.2rem;
-  font-weight: lighter;
+.logo-text:hover {
+  color: #555;
+}
+
+.nav-tagline {
+  font-size: 1rem;
   color: #666;
-  display: none;
+  display: none; /* Hidden by default, shown on mobile */
 }
 
-.main-tag {
+.nav-main-tag {
   font-size: 1.2rem;
-  font-weight: lighter;
   color: #666;
+  margin: 0 1rem;
 }
 
-.button {
-  text-align: right;
+.nav-buttons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
 }
 
-.contact-btn {
-  background-color: #333; /* Dark Gray Button */
-  margin: 5px;
-  color: #fff;
+.nav-button {
+  background-color: #333;
+  color: #ffffff;
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 3px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.5s ease, color 0.3s ease, font-weight 1s ease;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
-.contact-btn:hover {
+.nav-button:hover {
   background-color: #a5bfcc;
   color: #1c325b;
-  transform: translateY(-1px) translateX(-1px);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  font-weight: 400;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
+.nav-button.logout {
+  background-color: #dc3545;
+}
+
+.nav-button.logout:hover {
+  background-color: #c82333;
+}
+
+/* Responsive Design */
+
 .centered {
   display: flex;
   justify-content: center;
