@@ -74,16 +74,19 @@ const ModernInput = styled("input")({
 
 const AddCard = styled(Card)(({ theme }) => ({
   background: "#F0F4F9",
-  marginBottom: theme.spacing(3),
   padding: theme.spacing(2),
   border: "2px dashed #3E5879",
+  position: "sticky",
+  top: 0,
+  zIndex: 10,
+  marginBottom: theme.spacing(3),
+  backdropFilter: "blur(8px)",
+  backgroundColor: "rgba(240, 244, 249, 0.95)", // Added transparency for better visual
+  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", // Added shadow for depth when floating
 }));
 
-const LoadingContainer = styled(Box)({
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  minHeight: "200px",
+const ContentContainer = styled(Box)({
+  paddingTop: "16px", // Add some space for the fixed card
 });
 
 const SecretPage = () => {
@@ -232,79 +235,81 @@ const SecretPage = () => {
           </Box>
         </AddCard>
 
-        {secrets.length === 0 ? (
-          <EmptyState />
-        ) : (
-          secrets.map((secret) => (
-            <ClippedCard key={secret.secret_id}>
-              <CardContent
-                sx={{
-                  position: "relative",
-                  zIndex: 1,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  p: 3,
-                }}
-              >
-                {editingId === secret.secret_id ? (
-                  <ModernInput
-                    defaultValue={secret.secret}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleSave(secret.secret_id, e.target.value);
-                      }
-                      if (e.key === "Escape") {
-                        setEditingId(null);
-                      }
-                    }}
-                    disabled={actionLoading === secret.secret_id}
-                    autoFocus
-                  />
-                ) : (
-                  <Typography sx={{ color: "#1A1A1A", fontWeight: 600 }}>
-                    {secret.secret}
-                  </Typography>
-                )}
-
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  {actionLoading === secret.secret_id ? (
-                    <CircularProgress size={24} />
-                  ) : editingId === secret.secret_id ? (
-                    <>
-                      <IconButton
-                        onClick={(e) => {
-                          const input = e.target
-                            .closest(".MuiCardContent-root")
-                            .querySelector("input");
-                          handleSave(secret.secret_id, input.value);
-                        }}
-                      >
-                        <Save />
-                      </IconButton>
-                      <IconButton onClick={() => setEditingId(null)}>
-                        <Close />
-                      </IconButton>
-                    </>
+        <ContentContainer>
+          {secrets.length === 0 ? (
+            <EmptyState />
+          ) : (
+            secrets.map((secret) => (
+              <ClippedCard key={secret.secret_id}>
+                <CardContent
+                  sx={{
+                    position: "relative",
+                    zIndex: 1,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    p: 3,
+                  }}
+                >
+                  {editingId === secret.secret_id ? (
+                    <ModernInput
+                      defaultValue={secret.secret}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleSave(secret.secret_id, e.target.value);
+                        }
+                        if (e.key === "Escape") {
+                          setEditingId(null);
+                        }
+                      }}
+                      disabled={actionLoading === secret.secret_id}
+                      autoFocus
+                    />
                   ) : (
-                    <>
-                      <IconButton
-                        onClick={() => setEditingId(secret.secret_id)}
-                      >
-                        <Edit />
-                      </IconButton>
-                      <IconButton
-                        onClick={() => handleDelete(secret.secret_id)}
-                      >
-                        <Delete />
-                      </IconButton>
-                    </>
+                    <Typography sx={{ color: "#1A1A1A", fontWeight: 600 }}>
+                      {secret.secret}
+                    </Typography>
                   )}
-                </Box>
-              </CardContent>
-            </ClippedCard>
-          ))
-        )}
+
+                  <Box sx={{ display: "flex", gap: 1 }}>
+                    {actionLoading === secret.secret_id ? (
+                      <CircularProgress size={24} />
+                    ) : editingId === secret.secret_id ? (
+                      <>
+                        <IconButton
+                          onClick={(e) => {
+                            const input = e.target
+                              .closest(".MuiCardContent-root")
+                              .querySelector("input");
+                            handleSave(secret.secret_id, input.value);
+                          }}
+                        >
+                          <Save />
+                        </IconButton>
+                        <IconButton onClick={() => setEditingId(null)}>
+                          <Close />
+                        </IconButton>
+                      </>
+                    ) : (
+                      <>
+                        <IconButton
+                          onClick={() => setEditingId(secret.secret_id)}
+                        >
+                          <Edit />
+                        </IconButton>
+                        <IconButton
+                          onClick={() => handleDelete(secret.secret_id)}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </>
+                    )}
+                  </Box>
+                </CardContent>
+              </ClippedCard>
+            ))
+          )}
+        </ContentContainer>
       </Box>
     </div>
   );
