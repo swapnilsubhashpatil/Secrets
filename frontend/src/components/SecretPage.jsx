@@ -15,7 +15,67 @@ import Nav from "./Nav";
 import EmptyState from "./EmptyState";
 import { secretService } from "./apiService";
 
-// Keep existing styled components...
+const ClippedCard = styled(Card)(({ theme }) => ({
+  position: "relative",
+  background: "#3E5879",
+  clipPath:
+    "polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)",
+  border: "1px hidden",
+  marginBottom: theme.spacing(3),
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    top: 4,
+    left: 4,
+    right: 4,
+    bottom: 4,
+    background: "#F0F4F9",
+    clipPath:
+      "polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%)",
+    zIndex: 0,
+  },
+  "&:hover": {
+    transform: "translateX(5px)",
+    "&::after": {
+      transform: "translateX(-10px)",
+      opacity: 1,
+    },
+  },
+  "&::after": {
+    content: '""',
+    position: "absolute",
+    top: 0,
+    left: -5,
+    right: 5,
+    bottom: 0,
+    background: "linear-gradient(to right, #4B83EF, #ff0080)",
+    clipPath:
+      "polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)",
+    zIndex: -1,
+    opacity: 0,
+    transition: "all 0.3s ease",
+  },
+}));
+
+const ModernInput = styled("input")({
+  background: "#F5EFFF",
+  border: "none",
+  color: "#213555",
+  padding: "8px 12px",
+  borderRadius: "4px",
+  width: "100%",
+  "&:focus": {
+    outline: "1px solid #685752",
+    background: "#F5EFFF",
+  },
+});
+
+const AddCard = styled(Card)(({ theme }) => ({
+  background: "#F0F4F9",
+  marginBottom: theme.spacing(3),
+  padding: theme.spacing(2),
+  border: "2px dashed #3E5879",
+}));
 
 const LoadingContainer = styled(Box)({
   display: "flex",
