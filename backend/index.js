@@ -141,6 +141,13 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get("/", (req, res) => {
+  res.json({
+    status: "Server is running",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Session check route with detailed response
 app.get("/api/check-auth", (req, res) => {
   res.json({
@@ -529,19 +536,10 @@ passport.deserializeUser((user, done) => {
 app.use(errorHandler);
 
 // Server startup with enhanced error handling
-const server = app
+app
   .listen(port, () => {
     console.log(`Server running on port ${port}`);
   })
   .on("error", (err) => {
     console.error("Server startup error:", err);
-    process.exit(1);
   });
-
-// Graceful shutdown
-process.on("SIGTERM", () => {
-  console.log("SIGTERM signal received. Closing server...");
-  server.close(() => {
-    console.log("Server closed");
-  });
-});
