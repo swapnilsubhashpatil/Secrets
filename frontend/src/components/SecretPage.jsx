@@ -17,6 +17,7 @@ import { secretService } from "./apiService";
 import LoadingScreen from "./LoadingScreen";
 import LoadingSecrets from "./LoadingSecrets";
 
+// Styled Components
 const ClippedCard = styled(Card)(({ theme }) => ({
   position: "relative",
   background: "#3E5879",
@@ -72,24 +73,37 @@ const ModernInput = styled("input")({
   },
 });
 
+const AddCardContainer = styled(Box)(({ theme }) => ({
+  position: "sticky",
+  top: "calc(56px + 1rem)", // Account for navbar height plus padding
+  zIndex: 999, // Just below navbar's z-index
+  background: "transparent",
+  paddingTop: theme.spacing(2),
+  marginBottom: theme.spacing(3),
+}));
+
 const AddCard = styled(Card)(({ theme }) => ({
   background: "#F0F4F9",
   padding: theme.spacing(2),
   border: "2px dashed #3E5879",
-  position: "sticky",
-  top: 0,
-  zIndex: 10,
-  marginBottom: theme.spacing(3),
   backdropFilter: "blur(8px)",
-  backgroundColor: "rgba(240, 244, 249, 0.95)", // Added transparency for better visual
-  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)", // Added shadow for depth when floating
+  backgroundColor: "rgba(240, 244, 249, 0.95)",
+  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
 }));
 
 const ContentContainer = styled(Box)({
-  paddingTop: "16px", // Add some space for the fixed card
+  paddingTop: "16px",
+});
+
+const LoadingContainer = styled(Box)({
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  minHeight: "200px",
 });
 
 const SecretPage = () => {
+  // State Management
   const [error, setError] = useState("");
   const [secrets, setSecrets] = useState([]);
   const [newSecret, setNewSecret] = useState("");
@@ -97,10 +111,12 @@ const SecretPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
 
+  // Fetch secrets on component mount
   useEffect(() => {
     fetchSecrets();
   }, []);
 
+  // API Handlers
   const fetchSecrets = async () => {
     try {
       setIsLoading(true);
@@ -175,6 +191,7 @@ const SecretPage = () => {
     }
   };
 
+  // Loading State
   if (isLoading) {
     return (
       <div>
@@ -184,6 +201,7 @@ const SecretPage = () => {
     );
   }
 
+  // Main Render
   return (
     <div>
       <Nav onSecrets={true} />
@@ -194,46 +212,48 @@ const SecretPage = () => {
           </Typography>
         )}
 
-        <AddCard className="AddCard">
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="Enter a new secret..."
-              value={newSecret}
-              onChange={(e) => setNewSecret(e.target.value)}
-              onKeyPress={(e) => {
-                if (e.key === "Enter") handleAddSecret();
-              }}
-              disabled={actionLoading === "add"}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  backgroundColor: "white",
-                },
-              }}
-            />
-            <Button
-              variant="contained"
-              startIcon={
-                actionLoading === "add" ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  <Add />
-                )
-              }
-              onClick={handleAddSecret}
-              disabled={actionLoading === "add"}
-              sx={{
-                backgroundColor: "#3E5879",
-                "&:hover": {
-                  backgroundColor: "#4B83EF",
-                },
-              }}
-            >
-              Add
-            </Button>
-          </Box>
-        </AddCard>
+        <AddCardContainer>
+          <AddCard className="AddCard">
+            <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Enter a new secret..."
+                value={newSecret}
+                onChange={(e) => setNewSecret(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter") handleAddSecret();
+                }}
+                disabled={actionLoading === "add"}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    backgroundColor: "white",
+                  },
+                }}
+              />
+              <Button
+                variant="contained"
+                startIcon={
+                  actionLoading === "add" ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    <Add />
+                  )
+                }
+                onClick={handleAddSecret}
+                disabled={actionLoading === "add"}
+                sx={{
+                  backgroundColor: "#3E5879",
+                  "&:hover": {
+                    backgroundColor: "#4B83EF",
+                  },
+                }}
+              >
+                Add
+              </Button>
+            </Box>
+          </AddCard>
+        </AddCardContainer>
 
         <ContentContainer>
           {secrets.length === 0 ? (
