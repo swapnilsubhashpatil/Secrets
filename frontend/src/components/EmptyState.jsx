@@ -43,7 +43,7 @@ const InteractiveEmptyState = () => {
   if (!isClient) return null;
 
   return (
-    <div className="min-h-[400px] flex items-center justify-center p-8">
+    <div className="min-h-[500px] flex items-center justify-center p-2">
       <motion.div
         className="relative"
         style={{

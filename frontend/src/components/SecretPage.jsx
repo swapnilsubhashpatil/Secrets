@@ -75,7 +75,7 @@ const ModernInput = styled("input")({
 
 const AddCardContainer = styled(Box)(({ theme }) => ({
   position: "sticky",
-  top: "calc(56px + 1.4rem)", // Account for navbar height plus padding
+  top: "calc(56px + 1.6rem)", // Account for navbar height plus padding
   zIndex: 999, // Just below navbar's z-index
   background: "transparent",
   paddingTop: theme.spacing(2),
