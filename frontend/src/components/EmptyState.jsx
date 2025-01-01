@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Card, Typography, Box, styled, keyframes } from "@mui/material";
+import React from "react";
+import { Card, Typography, Box, styled } from "@mui/material";
 import { Mood, Favorite, Star, Cloud } from "@mui/icons-material";
+import TypingAnimation from "./Typing Animation";
 
 // Keyframe Animations
 const float = keyframes`
@@ -105,9 +106,9 @@ const FunkySubMessage = styled(Typography)(({ theme }) => ({
 }));
 
 const EmptyState = () => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     setIsVisible(true);
   }, []);
 

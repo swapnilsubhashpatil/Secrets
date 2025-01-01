@@ -191,15 +191,8 @@ const SecretPage = () => {
           </Typography>
         )}
 
-        <AddCard>
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              alignItems: "center",
-              position: "fixed",
-            }}
-          >
+        <AddCard className="AddCard">
+          <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
             <TextField
               fullWidth
               variant="outlined"
