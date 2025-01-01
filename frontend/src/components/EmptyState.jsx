@@ -43,7 +43,7 @@ const InteractiveEmptyState = () => {
   if (!isClient) return null;
 
   return (
-    <div className="w-full h-screen flex items-center justify-center p-6">
+    <div className="flex-1 flex items-center justify-center p-6 mt-8">
       <motion.div
         className="relative w-full max-w-lg mx-auto"
         style={{
