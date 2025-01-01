@@ -15,6 +15,7 @@ import Nav from "./Nav";
 import EmptyState from "./EmptyState";
 import { secretService } from "./apiService";
 import LoadingScreen from "./LoadingScreen";
+import LoadingSecrets from "./LoadingSecrets";
 
 const ClippedCard = styled(Card)(({ theme }) => ({
   position: "relative",
@@ -175,7 +176,7 @@ const SecretPage = () => {
     return (
       <div>
         <Nav onSecrets={true} />
-        <LoadingScreen message="Unveiling your secrets... Patience!" />
+        <LoadingSecrets message="Unveiling your secrets... Patience!" />
       </div>
     );
   }
