@@ -1,5 +1,6 @@
 import axios from "axios";
-const API_BASE_URL = "https://secret-xb7x.onrender.com";
+const API_BASE_URL =
+  "https://6cb98588-e3e7-42ef-acca-97e87bde337d.e1-us-east-azure.choreoapps.dev";
 // const API_BASE_URL = "http://localhost:3000";
 
 const api = axios.create({
