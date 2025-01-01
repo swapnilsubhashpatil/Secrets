@@ -14,6 +14,7 @@ import { Edit, Delete, Save, Close, Add } from "@mui/icons-material";
 import Nav from "./Nav";
 import EmptyState from "./EmptyState";
 import { secretService } from "./apiService";
+import LoadingScreen from "./LoadingScreen";
 
 const ClippedCard = styled(Card)(({ theme }) => ({
   position: "relative",
@@ -174,9 +175,7 @@ const SecretPage = () => {
     return (
       <div>
         <Nav onSecrets={true} />
-        <LoadingContainer>
-          <CircularProgress />
-        </LoadingContainer>
+        <LoadingScreen message="Unveiling your secrets... Patience!" />
       </div>
     );
   }

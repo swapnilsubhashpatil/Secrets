@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
+import { Alert } from "@mui/material";
 import { authService } from "./apiService";
 
 const SignUpPage = () => {
@@ -8,6 +9,7 @@ const SignUpPage = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleGoogleLogin = () => {
@@ -16,9 +18,12 @@ const SignUpPage = () => {
 
   const handleSignUp = async (event) => {
     event.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
+      setIsLoading(false);
       return;
     }
 
@@ -30,11 +35,23 @@ const SignUpPage = () => {
       window.location.href = "/secrets";
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="max-h-screen">
+      {error && (
+        <Alert
+          severity="warning"
+          onClose={() => {
+            setError("");
+          }}
+        >
+          {error}
+        </Alert>
+      )}
       <section className="border-red-500 bg-gray-200 min-h-screen flex items-center justify-center">
         <div className="bg-gray-100 py-2 flex rounded-2xl shadow-lg max-w-3xl">
           <div className="md:w-1/2 px-5">
@@ -53,6 +70,7 @@ const SignUpPage = () => {
                   className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
                   required
                 />
               </div>
@@ -67,6 +85,7 @@ const SignUpPage = () => {
                   className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
                   required
                 />
               </div>
@@ -81,17 +100,19 @@ const SignUpPage = () => {
                   className="w-full px-4 py-3 rounded-lg bg-gray-200 mt-2 border focus:border-blue-500 focus:bg-white focus:outline-none"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isLoading}
                   required
                 />
               </div>
 
-              {error && <p className="text-red-500 text-sm">{error}</p>}
-
               <button
                 type="submit"
-                className="w-full block bg-blue-500 hover:bg-blue-400 focus:bg-blue-400 text-white font-semibold rounded-lg px-4 py-3 mt-6"
+                className={`w-full block bg-blue-500 hover:bg-blue-400 focus:bg-blue-400 text-white font-semibold rounded-lg px-4 py-3 mt-6 ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={isLoading}
               >
-                Sign Up
+                {isLoading ? "Creating Account..." : "Sign Up"}
               </button>
             </form>
 
@@ -103,7 +124,10 @@ const SignUpPage = () => {
 
             <button
               onClick={handleGoogleLogin}
-              className="bg-white border py-2 w-full rounded-xl mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 "
+              className={`bg-white border py-2 w-full rounded-xl mt-5 flex justify-center items-center text-sm hover:scale-105 duration-300 ${
+                isLoading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={isLoading}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -143,8 +167,11 @@ const SignUpPage = () => {
             <div className="text-sm flex justify-between items-center mt-3">
               <p>Already have an account?</p>
               <button
-                className="py-2 px-5 ml-3 bg-white border rounded-xl hover:scale-110 duration-300 border-blue-400"
+                className={`py-2 px-5 ml-3 bg-white border rounded-xl hover:scale-110 duration-300 border-blue-400 ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
                 onClick={() => navigate("/login")}
+                disabled={isLoading}
               >
                 Log In
               </button>
