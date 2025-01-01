@@ -8,90 +8,37 @@ import {
   styled,
   TextField,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import { Edit, Delete, Save, Close, Add } from "@mui/icons-material";
 import Nav from "./Nav";
 import EmptyState from "./EmptyState";
 import { secretService } from "./apiService";
 
-// Styled Components
-const ClippedCard = styled(Card)(({ theme }) => ({
-  position: "relative",
-  background: "#3E5879",
-  clipPath:
-    "polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)",
-  border: "1px hidden",
-  marginBottom: theme.spacing(3),
-  "&::before": {
-    content: '""',
-    position: "absolute",
-    top: 4,
-    left: 4,
-    right: 4,
-    bottom: 4,
-    background: "#F0F4F9",
-    clipPath:
-      "polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%)",
-    zIndex: 0,
-  },
-  "&:hover": {
-    transform: "translateX(5px)",
-    "&::after": {
-      transform: "translateX(-10px)",
-      opacity: 1,
-    },
-  },
-  "&::after": {
-    content: '""',
-    position: "absolute",
-    top: 0,
-    left: -5,
-    right: 5,
-    bottom: 0,
-    background: "linear-gradient(to right, #4B83EF, #ff0080)",
-    clipPath:
-      "polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%)",
-    zIndex: -1,
-    opacity: 0,
-    transition: "all 0.3s ease",
-  },
-}));
+// Keep existing styled components...
 
-const ModernInput = styled("input")({
-  background: "#F5EFFF",
-  border: "none",
-  color: "#213555",
-  padding: "8px 12px",
-  borderRadius: "4px",
-  width: "100%",
-  "&:focus": {
-    outline: "1px solid #685752",
-    background: "#F5EFFF",
-  },
+const LoadingContainer = styled(Box)({
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  minHeight: "200px",
 });
 
-const AddCard = styled(Card)(({ theme }) => ({
-  background: "#F0F4F9",
-  marginBottom: theme.spacing(3),
-  padding: theme.spacing(2),
-  border: "2px dashed #3E5879",
-}));
-
 const SecretPage = () => {
-  // State Management
   const [error, setError] = useState("");
   const [secrets, setSecrets] = useState([]);
   const [newSecret, setNewSecret] = useState("");
   const [editingId, setEditingId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(null);
 
-  // Fetch secrets on component mount
   useEffect(() => {
     fetchSecrets();
   }, []);
 
-  // Fetch all secrets
   const fetchSecrets = async () => {
     try {
+      setIsLoading(true);
       const response = await secretService.fetchSecrets();
       if (response.data.success) {
         setSecrets(response.data.secrets);
@@ -100,79 +47,90 @@ const SecretPage = () => {
     } catch (err) {
       console.error("Fetch error:", err);
       setError("Failed to load secrets. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Add new secret
   const handleAddSecret = async () => {
     if (!newSecret.trim()) return;
+    setActionLoading("add");
 
     try {
       const response = await secretService.addSecret(newSecret);
       if (response.data.success) {
-        await fetchSecrets(); // Refresh the list
+        setSecrets((prev) => [...prev, response.data.secret]);
         setNewSecret("");
         setError("");
       }
     } catch (err) {
       console.error("Add error:", err);
       setError("Failed to add secret. Please try again.");
+    } finally {
+      setActionLoading(null);
     }
   };
 
-  // Enable edit mode
-  const handleEdit = (id) => {
-    setEditingId(id);
-  };
-
-  // Cancel edit mode
-  const handleCancel = () => {
-    setEditingId(null);
-  };
-
-  // Save edited secret
   const handleSave = async (id, newTitle) => {
     if (!newTitle.trim()) return;
+    setActionLoading(id);
 
     try {
       const response = await secretService.updateSecret(id, newTitle);
       if (response.data.success) {
-        await fetchSecrets(); // Refresh the list
+        setSecrets((prev) =>
+          prev.map((secret) =>
+            secret.secret_id === id ? response.data.secret : secret
+          )
+        );
         setEditingId(null);
         setError("");
       }
     } catch (err) {
       console.error("Update error:", err);
       setError("Failed to update secret. Please try again.");
+    } finally {
+      setActionLoading(null);
     }
   };
 
-  // Delete secret
   const handleDelete = async (id) => {
+    setActionLoading(id);
     try {
       const response = await secretService.deleteSecret(id);
       if (response.data.success) {
-        await fetchSecrets(); // Refresh the list
+        setSecrets((prev) => prev.filter((secret) => secret.secret_id !== id));
         setError("");
       }
     } catch (err) {
       console.error("Delete error:", err);
       setError("Failed to delete secret. Please try again.");
+    } finally {
+      setActionLoading(null);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div>
+        <Nav onSecrets={true} />
+        <LoadingContainer>
+          <CircularProgress />
+        </LoadingContainer>
+      </div>
+    );
+  }
 
   return (
     <div>
       <Nav onSecrets={true} />
       <Box sx={{ maxWidth: 800, mx: "auto", p: 3 }}>
-        {/* Error Display */}
         {error && (
           <Typography color="error" sx={{ mb: 2 }}>
             {error}
           </Typography>
         )}
 
-        {/* Add New Secret Section */}
         <AddCard>
           <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
             <TextField
@@ -184,6 +142,7 @@ const SecretPage = () => {
               onKeyPress={(e) => {
                 if (e.key === "Enter") handleAddSecret();
               }}
+              disabled={actionLoading === "add"}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "white",
@@ -192,8 +151,15 @@ const SecretPage = () => {
             />
             <Button
               variant="contained"
-              startIcon={<Add />}
+              startIcon={
+                actionLoading === "add" ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  <Add />
+                )
+              }
               onClick={handleAddSecret}
+              disabled={actionLoading === "add"}
               sx={{
                 backgroundColor: "#3E5879",
                 "&:hover": {
@@ -206,7 +172,6 @@ const SecretPage = () => {
           </Box>
         </AddCard>
 
-        {/* Secrets List */}
         {secrets.length === 0 ? (
           <EmptyState />
         ) : (
@@ -223,7 +188,6 @@ const SecretPage = () => {
                 }}
               >
                 {editingId === secret.secret_id ? (
-                  // Edit Mode
                   <ModernInput
                     defaultValue={secret.secret}
                     onKeyDown={(e) => {
@@ -231,21 +195,22 @@ const SecretPage = () => {
                         handleSave(secret.secret_id, e.target.value);
                       }
                       if (e.key === "Escape") {
-                        handleCancel();
+                        setEditingId(null);
                       }
                     }}
+                    disabled={actionLoading === secret.secret_id}
                     autoFocus
                   />
                 ) : (
-                  // Display Mode
                   <Typography sx={{ color: "#1A1A1A", fontWeight: 600 }}>
                     {secret.secret}
                   </Typography>
                 )}
 
-                {/* Action Buttons */}
                 <Box sx={{ display: "flex", gap: 1 }}>
-                  {editingId === secret.secret_id ? (
+                  {actionLoading === secret.secret_id ? (
+                    <CircularProgress size={24} />
+                  ) : editingId === secret.secret_id ? (
                     <>
                       <IconButton
                         onClick={(e) => {
@@ -254,40 +219,22 @@ const SecretPage = () => {
                             .querySelector("input");
                           handleSave(secret.secret_id, input.value);
                         }}
-                        sx={{
-                          color: "#90caf9",
-                          "&:hover": { bgcolor: "rgba(144, 202, 249, 0.08)" },
-                        }}
                       >
                         <Save />
                       </IconButton>
-                      <IconButton
-                        onClick={handleCancel}
-                        sx={{
-                          color: "#f48fb1",
-                          "&:hover": { bgcolor: "rgba(244, 143, 177, 0.08)" },
-                        }}
-                      >
+                      <IconButton onClick={() => setEditingId(null)}>
                         <Close />
                       </IconButton>
                     </>
                   ) : (
                     <>
                       <IconButton
-                        onClick={() => handleEdit(secret.secret_id)}
-                        sx={{
-                          color: "#A7D477",
-                          "&:hover": { bgcolor: "#E5D9F2" },
-                        }}
+                        onClick={() => setEditingId(secret.secret_id)}
                       >
                         <Edit />
                       </IconButton>
                       <IconButton
                         onClick={() => handleDelete(secret.secret_id)}
-                        sx={{
-                          color: "#F72C5B",
-                          "&:hover": { bgcolor: "#E5D9F2" },
-                        }}
                       >
                         <Delete />
                       </IconButton>
